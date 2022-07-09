@@ -21,5 +21,5 @@ Modifications:
 
 Code available on: https://github.com/digamesystems/DigameSerialPlotter
 
-<img src="/doc/screenshot.jpg" width="50%" />
+<img src="/doc/screenshot.jpg"/>
 
