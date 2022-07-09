@@ -1,5 +1,9 @@
 # DigameSerialPlotter
-A serial plotting utility for Processing
+A serial plotting utility for "Processing": 
+
+  https://processing.org/
+
+##Overview
 
 A modification and slight re-factoring of the BasicRealTimePlotter example from
 Sebastian Nilsson's spiffy serial plotting utility for Processing:
