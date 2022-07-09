@@ -1,4 +1,5 @@
 /*
+DigameSerialPlotter 
 
 A modification and slight re-factoring of the BasicRealTimePlotter example from
 Sebastian Nilsson's spiffy serial plotting utility for Processing:
@@ -18,6 +19,8 @@ Modifications:
     traces relative to each other on the fly.
   * Some re-factoring of the UI setup code to improve readability.
 
+Code available on: 
+
 */
 
 // import libraries
@@ -28,10 +31,10 @@ import processing.serial.*;
 
 /* SETTINGS BEGIN */
   // Serial port to connect to
-  String  serialPortName = "COM24";// For Linux / Pi something like: "/dev/tty.usbmodem1411";
-  byte    terminator     = '\n';         // The last character in a data frame -- usually <cr> or <lf> 
-  boolean mockupSerial   = false;   // If you want to debug the plotter without using 
-                                  // a real serial port set this to true
+  String  serialPortName;// For Linux / Pi something like: "/dev/tty.usbmodem1411";
+  byte    terminator     = '\n';   // The last character in a data frame -- usually <cr> or <lf> 
+  boolean mockupSerial   = false;  // If you want to debug the plotter without using 
+                                   // a real serial port set this to true
 /* SETTINGS END */
 
 Serial serialPort; // Serial port object
@@ -75,6 +78,16 @@ void addToggle(String name, int x, int y, color aColor)
 }
 
 void setup() {
+   if (args != null) {
+    println(args.length);
+    println(args[0]);
+    serialPortName = args[0];
+  } else {
+    println("No com port specified. Using default value. (COM24).");
+    serialPortName = "COM24";  // Change to match your setup if you don't run from the command line. 
+  }
+  
+  
   surface.setTitle("Tweaked Real-Time plotter");
   size(1500, 700);
 
