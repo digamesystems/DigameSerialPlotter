@@ -1,5 +1,5 @@
 # DigameSerialPlotter
-A serial plotting utility for "Processing": 
+A serial plotting utility that runs under "Processing": 
 
   https://processing.org/
 
@@ -15,7 +15,7 @@ Andreas Schlegel:
 
   https://sojamo.de/libraries/controlP5
 
-Modifications: 
+### Modifications: 
   * For my work, I didn't need the bar chart included in Sebastian's example so I removed it. 
   * Added a 'terminator' variable so we can accomodate different message terminations. 
   * Did some playing with fonts to make it a bit more readable for my old eyes. ;)
@@ -23,7 +23,8 @@ Modifications:
     traces relative to each other on the fly.
   * Some re-factoring of the UI setup code to improve readability.
 
-Code available on: https://github.com/digamesystems/DigameSerialPlotter
-
+## Code available on: 
+  https://github.com/digamesystems/DigameSerialPlotter
+  
 <img src="/doc/screenshot.jpg"/>
 
