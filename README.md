@@ -11,7 +11,7 @@ I decided to roll my own version after discovering Sebastian Nilsson's spiffy se
 
   https://github.com/sebnil/RealtimePlotter
 
-I based this app on is BasicRealTimePlotter example. Like his code, this code relies on the excellent library of UI controls developed by Andreas Schlegel:
+I based this app on his BasicRealTimePlotter example. Like his code, this code relies on the excellent library of UI controls developed by Andreas Schlegel:
 
   https://sojamo.de/libraries/controlP5
 
