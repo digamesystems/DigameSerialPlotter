@@ -23,7 +23,7 @@ I based this app on his BasicRealTimePlotter example. Like his code, this code r
   * Added an 'offset' UI element in addition to Sebastian's 'multiplier' so we can shift 
     traces relative to each other on the fly.
   * Some re-factoring of the UI setup code to improve readability.
-  * Added data logging to a file. 
+  * Added data logging to a file. Files will show up in the /data directory.
 
 ## Installation
 
