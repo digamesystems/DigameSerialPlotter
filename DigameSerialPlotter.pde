@@ -81,14 +81,11 @@ void setup() {
    if (args != null) {
     println(args.length);
     println(args[0]);
-    flush();
     delay(1000);
     serialPortName = args[0];
   } else {
     println("No com port specified. Using default value. (COM24)");
-    flush();
     delay(1000);
-    println("hi");
     serialPortName = "COM24";  // Change to match your setup if you don't run from the command line. 
   }
   
@@ -141,7 +138,7 @@ void setup() {
   
   
   PFont   font;                   // Selected font used for text 
-  font = createFont("arial",20);
+  font = createFont("arial",20,true);
 
   addTextField("lgMaxY", x,y, font);
   addTextField("lgMinY", x,y+488, font);
@@ -259,6 +256,7 @@ void setChartSettings() {
 
 // handle gui actions
 void controlEvent(ControlEvent theEvent) {
+  
   if (theEvent.isAssignableFrom(Textfield.class) || theEvent.isAssignableFrom(Toggle.class) || theEvent.isAssignableFrom(Button.class)) {
     String parameter = theEvent.getName();
     String value = "";

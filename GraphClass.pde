@@ -40,6 +40,8 @@
   
       PFont   Font;                   // Selected font used for text 
       
+      
+      
   //    int Peakcounter=0,nPeakcounter=0;
      
       Graph(int x, int y, int w, int h,color k) {  // The main declaration function
@@ -53,7 +55,7 @@
     
      
        void DrawAxis(){
-       
+         
    /*  =========================================================================================
         Main axes Lines, Graph Labels, Graph Background
        ==========================================================================================  */
