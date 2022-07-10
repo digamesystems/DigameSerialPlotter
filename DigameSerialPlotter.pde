@@ -18,6 +18,7 @@ Modifications:
   * Added an 'offset' UI element in addition to Sebastian's 'multiplier' so we can shift 
     traces relative to each other on the fly.
   * Some re-factoring of the UI setup code to improve readability.
+  * Added data logging option.
 
 Code available on: 
 
@@ -193,7 +194,7 @@ void setup() {
 
   cp5.addTextlabel("label").setFont(font).setText("ON-OFF").setPosition(x=35, y).setColor(0);
   cp5.addTextlabel("multipliers").setFont(font).setText("Multiplier").setPosition(x=125, y).setColor(0);
-  cp5.addTextlabel("offsets").setFont(font).setText("Offset").setPosition(x=230, y).setColor(0);
+  cp5.addTextlabel("offsets").setFont(font).setText("Offset").setPosition(x=225, y).setColor(0);
   
   addTextField("lgMultiplier1", x=130, y=y+ySpacing, font);
   addTextField("lgMultiplier2", x,     y=y+ySpacing, font);
@@ -226,8 +227,7 @@ void setup() {
   tglLogData = cp5.addToggle("toggleValue")
    .setPosition(190,y)
    .setSize(35,35)
-   .setColorBackground(color(128,128,128))
-   ;
+   .setColorBackground(color(128,128,128));
    
   lblPointsLogged = cp5.addTextlabel("lblNumPointsLogged")
     .setFont(font)
@@ -259,10 +259,10 @@ public static void appendStrToFile(String fileName, String str)
  
     // Catch block to handle the exceptions
     catch (IOException e) {
- 
         // Display message when exception occurs
         System.out.println("exception occurred" + e);
     }
+        
 }
 
 
