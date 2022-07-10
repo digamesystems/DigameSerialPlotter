@@ -35,11 +35,6 @@ Andreas Schlegel:
   * Run it. If your micro is sending data in the form `data1 data2 data3 data4 ... data6\n` you should see data plotted. 
   * Adjust the Y min / max values to match the data you are sending. 
 
-### Windows 64bit .exe
-
-  * If you don't want to go to the trouble of installing the environment above, I'm including an executable Processing export of the program for Windows 64bit machines. -- It lives in the `windows-amd64` directory. You need to enter the `serialPortName` as a command line parameter, e.g., "`DigameSerialPlotter.exe COM4`" or it will use a default value that probably wont match your setup.
-  * My experience with the executable version is that the fonts are a bit 'chunkier' than when running under the Processing IDE and the window shows up larger, but it works well. -- Let me know how it works for you on your system.
-
 ## Next Steps? 
   * Easier configuration of serial port. (Currently a command line argument)
   * Logging data to a file in CSV or similar format? 
