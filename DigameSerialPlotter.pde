@@ -81,14 +81,19 @@ void setup() {
    if (args != null) {
     println(args.length);
     println(args[0]);
+    flush();
+    delay(1000);
     serialPortName = args[0];
   } else {
-    println("No com port specified. Using default value. (COM24).");
+    println("No com port specified. Using default value. (COM24)");
+    flush();
+    delay(1000);
+    println("hi");
     serialPortName = "COM24";  // Change to match your setup if you don't run from the command line. 
   }
   
   
-  surface.setTitle("Tweaked Real-Time plotter");
+  surface.setTitle("Digame Serial Plotter");
   size(1500, 700);
 
   // set line graph colors
@@ -134,9 +139,10 @@ void setup() {
   int y = initY;  
   int ySpacing = 50; 
   
+  
   PFont   font;                   // Selected font used for text 
   font = createFont("arial",20);
-  
+
   addTextField("lgMaxY", x,y, font);
   addTextField("lgMinY", x,y+488, font);
 
@@ -256,6 +262,7 @@ void controlEvent(ControlEvent theEvent) {
   if (theEvent.isAssignableFrom(Textfield.class) || theEvent.isAssignableFrom(Toggle.class) || theEvent.isAssignableFrom(Button.class)) {
     String parameter = theEvent.getName();
     String value = "";
+    
     if (theEvent.isAssignableFrom(Textfield.class))
       value = theEvent.getStringValue();
     else if (theEvent.isAssignableFrom(Toggle.class) || theEvent.isAssignableFrom(Button.class))
