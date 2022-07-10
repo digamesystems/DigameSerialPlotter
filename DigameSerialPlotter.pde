@@ -26,59 +26,102 @@ Code available on:
 // import libraries
 import java.awt.Frame;
 import java.awt.BorderLayout;
-import controlP5.*; // http://www.sojamo.de/libraries/controlP5/
+import java.io.*;
+import controlP5.*; // Nifty UI library for Processing 
+                    //   See: http://www.sojamo.de/libraries/controlP5/
 import processing.serial.*;
 
-/* SETTINGS BEGIN */
-  // Serial port to connect to
-  String  serialPortName;// For Linux / Pi something like: "/dev/tty.usbmodem1411";
-  byte    terminator     = '\n';   // The last character in a data frame -- usually <cr> or <lf> 
-  boolean mockupSerial   = false;  // If you want to debug the plotter without using 
-                                   // a real serial port set this to true
-/* SETTINGS END */
+/* GLOBALS */
 
-Serial serialPort; // Serial port object
+// Serial port to connect to
+String  serialPortName="COM24";  // For Linux / Pi something like: "/dev/tty.usbmodem1411";
+byte    terminator     = '\n';   // The last character in a data frame -- usually <cr> or <lf> 
+boolean mockupSerial   = false;  // If you want to debug the plotter without using 
+                                 //   a real serial port set this to true
 
-ControlP5 cp5; // Nifty UI library for Processing
-               //   See: https://sojamo.de/libraries/controlP5/
-                         
-// Settings for the plotter are saved in this file
-JSONObject plotterConfigJSON;
+processing.serial.Serial serialPort; // Serial port object
 
-// Plots
-Graph LineGraph = new Graph(450, 70, 900, 500, color (20, 20, 200));
-float[][] lineGraphValues = new float[6][200];
+ControlP5 cp5; 
+
+JSONObject plotterConfigJSON;    // Settings for the plotter are saved in this object
+
+// Plot
+Graph LineGraph = new Graph(450, 70, 900, 600, color (20, 20, 200));
+float[][] lineGraphValues      = new float[6][200];
 float[] lineGraphSampleNumbers = new float[200];
-color[] graphColors = new color[6];
+color[] graphColors            = new color[6];
 
-// helper for saving the executing path
-String topSketchPath = "";
+String topSketchPath = "";  // Path to config file
 
 
-void addTextField(String name, int x, int y, PFont font)
+
+long numPointsLogged = 0;
+Textlabel lblPointsLogged;
+Toggle    tglLogData;
+Textfield txtLogFileName;
+
+
+
+//***********************************************************************************
+Textfield addTextField(String name, int x, int y, PFont font)
+//***********************************************************************************
 {
+  Textfield tf;
   
-  cp5.addTextfield(name)
-  .setPosition(x,y)
-  .setSize(65, 30)
-  .setFont(font)
-  .setText(getPlotterConfigString(name))
-  .setAutoClear(false);
-  return;
+  tf = cp5.addTextfield(name)
+    .setPosition(x,y)
+    .setSize(65, 35)
+    .setColorBackground(color(255,255,255))
+    .setColorForeground(color(0,0,0))
+    .setColorValue(color(0,0,0))
+    .setColorActive(color(0,255,0))
+    .setFont(font)
+    .setText(getPlotterConfigString(name))
+    .setAutoClear(false);
+  return tf;
 }
 
+//***********************************************************************************
+Textfield addTextField(String name, int x, int y, PFont font, int fieldWidth)
+//***********************************************************************************
+{
+  
+  Textfield tf;
+  
+  tf = cp5.addTextfield(name)
+    .setPosition(x,y)
+    .setSize(fieldWidth, 35)
+    .setColorBackground(color(255,255,255))
+    .setColorForeground(color(0,0,0))
+    .setColorValue(color(0,0,0))
+    .setColorActive(color(0,255,0))
+    .setFont(font)
+    .setText(getPlotterConfigString(name))
+    .setAutoClear(false);
+  return tf;
+}
+
+
+
+
+//***********************************************************************************
 void addToggle(String name, int x, int y, color aColor)
+//***********************************************************************************
 { 
   cp5.addToggle(name)
     .setPosition(x, y)
+    .setSize(60,30)
     .setValue(int(getPlotterConfigString(name)))
     .setMode(ControlP5.SWITCH)
     .setColorActive(aColor);   
   return;
 }
 
-void setup() {
-   if (args != null) {
+
+//***********************************************************************************
+void initSerial() {
+//***********************************************************************************
+  if (args != null) {
     println(args.length);
     println(args[0]);
     delay(1000);
@@ -89,9 +132,24 @@ void setup() {
     serialPortName = "COM24";  // Change to match your setup if you don't run from the command line. 
   }
   
+  //  serial communication
+  if (!mockupSerial) {
+    //String serialPortName = Serial.list()[3];
+    serialPort = new processing.serial.Serial(this, serialPortName, 115200);
+  }
+  else
+    serialPort = null;
+}
+
+
+//***********************************************************************************
+void setup() {
+//***********************************************************************************
   
+  initSerial(); 
+    
   surface.setTitle("Digame Serial Plotter");
-  size(1500, 700);
+  size(1500, 800);
 
   // set line graph colors
   graphColors[0] = color(131, 255, 20);
@@ -102,7 +160,7 @@ void setup() {
   graphColors[5] = color(200, 46, 232);
 
   // Load the previous graph settings
-  topSketchPath = sketchPath();
+  topSketchPath     = sketchPath();
   plotterConfigJSON = loadJSONObject(topSketchPath+"/plotter_config.json");
 
   // initialize GUI library
@@ -120,34 +178,24 @@ void setup() {
     }
   }
   
-  // start serial communication
-  if (!mockupSerial) {
-    //String serialPortName = Serial.list()[3];
-    serialPort = new Serial(this, serialPortName, 115200);
-  }
-  else
-    serialPort = null;
-
-
   // build the gui
-  int initX = 380;
-  int x = initX;
-  int initY = 55;
-  int y = initY;  
+  int initX    = 380;
+  int x        = initX;
+  int initY    = 60;
+  int y        = initY;  
   int ySpacing = 50; 
-  
-  
-  PFont   font;                   // Selected font used for text 
+ 
+  PFont   font;   // Selected font used for text 
   font = createFont("arial",20,true);
 
   addTextField("lgMaxY", x,y, font);
-  addTextField("lgMinY", x,y+488, font);
+  addTextField("lgMinY", x,y+578, font);
 
-  cp5.addTextlabel("label").setFont(font).setText("ON/OFF").setPosition(x=13, y).setColor(0);
-  cp5.addTextlabel("multipliers").setFont(font).setText("Multiplier").setPosition(x=100, y).setColor(0);
-  cp5.addTextlabel("offsets").setFont(font).setText("Offset").setPosition(x=200, y).setColor(0);
+  cp5.addTextlabel("label").setFont(font).setText("ON-OFF").setPosition(x=35, y).setColor(0);
+  cp5.addTextlabel("multipliers").setFont(font).setText("Multiplier").setPosition(x=125, y).setColor(0);
+  cp5.addTextlabel("offsets").setFont(font).setText("Offset").setPosition(x=230, y).setColor(0);
   
-  addTextField("lgMultiplier1", x=110, y=y+ySpacing, font);
+  addTextField("lgMultiplier1", x=130, y=y+ySpacing, font);
   addTextField("lgMultiplier2", x,     y=y+ySpacing, font);
   addTextField("lgMultiplier3", x,     y=y+ySpacing, font);
   addTextField("lgMultiplier4", x,     y=y+ySpacing, font);
@@ -155,7 +203,7 @@ void setup() {
   addTextField("lgMultiplier6", x,     y=y+ySpacing, font);
   
   y = initY + ySpacing;
-  addTextField("lgOffset1", x=210, y, font);
+  addTextField("lgOffset1", x=230, y, font);
   addTextField("lgOffset2", x, y=y+ySpacing, font);
   addTextField("lgOffset3", x, y=y+ySpacing, font);
   addTextField("lgOffset4", x, y=y+ySpacing, font);
@@ -163,18 +211,74 @@ void setup() {
   addTextField("lgOffset6", x, y=y+ySpacing, font);
   
   y = initY + ySpacing;
-  addToggle("lgVisible1", x=30, y,            graphColors[0]);
+  addToggle("lgVisible1", x=45, y,            graphColors[0]);
   addToggle("lgVisible2", x,    y=y+ySpacing, graphColors[1]);
   addToggle("lgVisible3", x,    y=y+ySpacing, graphColors[2]);
   addToggle("lgVisible4", x,    y=y+ySpacing, graphColors[3]);
   addToggle("lgVisible5", x,    y=y+ySpacing, graphColors[4]);
   addToggle("lgVisible6", x,    y=y+ySpacing, graphColors[5]);
   
+  
+  cp5.addTextlabel("lblLogFile").setFont(font).setText("Log File: ").setPosition(x=33, y=y+ySpacing*2).setColor(0);
+  txtLogFileName = addTextField("txtLogFileName", x=125, y-5, font, 150);
+  
+  cp5.addTextlabel("lblLoggingActive").setFont(font).setText("Logging Active: ").setPosition(x=33, y=y+ySpacing).setColor(0);
+  tglLogData = cp5.addToggle("toggleValue")
+   .setPosition(190,y)
+   .setSize(35,35)
+   .setColorBackground(color(128,128,128))
+   ;
+   
+  lblPointsLogged = cp5.addTextlabel("lblNumPointsLogged")
+    .setFont(font)
+    .setText("Points Logged: 0")
+    .setPosition(x=33, y=y+ySpacing)
+    .setColor(0);
+  
 }
 
-byte[] inBuffer = new byte[1024]; // holds serial message
-int i = 0; // loop variable
+
+//***********************************************************************************
+public static void appendStrToFile(String fileName, String str)
+//***********************************************************************************
+{
+    //println(fileName);
+    // Try block to check for exceptions
+    try {
+ 
+        // Open given file in append mode by creating an
+        // object of BufferedWriter class
+        BufferedWriter out = new BufferedWriter(
+            new FileWriter(fileName, true));
+ 
+        // Writing on output stream
+        out.write(str);
+        // Closing the connection
+        out.close();
+    }
+ 
+    // Catch block to handle the exceptions
+    catch (IOException e) {
+ 
+        // Display message when exception occurs
+        System.out.println("exception occurred" + e);
+    }
+}
+
+
+//***********************************************************************************
+void appendLog(String s) {
+//***********************************************************************************
+  appendStrToFile(topSketchPath+"/data/"+txtLogFileName.getText(),s); 
+}
+
+
+//***********************************************************************************
 void draw() {
+//***********************************************************************************
+  byte[] inBuffer = new byte[1024]; // holds serial message
+  int i = 0; // loop variable
+  
   /* Read serial and update values */
   if (mockupSerial || serialPort.available() > 0) {
     String myString = "";
@@ -185,6 +289,12 @@ void draw() {
       catch (Exception e) {
       }
       myString = new String(inBuffer);
+      myString = trim(myString) +"\n";
+      if (tglLogData.getValue()==1){
+        numPointsLogged++;
+        lblPointsLogged.setText("Points Logged: " + numPointsLogged);
+        appendLog(myString);
+      }
     }
     else {
       myString = mockupSerialFunction();
@@ -195,24 +305,9 @@ void draw() {
     // split the string at delimiter (space)
     String[] nums = split(myString, ' ');
     
-    // count number of bars and line graphs to hide
-    int numberOfInvisibleBars = 0;
-    for (i=0; i<6; i++) {
-      if (int(getPlotterConfigString("bcVisible"+(i+1))) == 0) {
-        numberOfInvisibleBars++;
-      }
-    }
-    int numberOfInvisibleLineGraphs = 0;
-    for (i=0; i<6; i++) {
-      if (int(getPlotterConfigString("lgVisible"+(i+1))) == 0) {
-        numberOfInvisibleLineGraphs++;
-      }
-    }
-
-    // build the arrays for bar charts and line graphs
-    int barchartIndex = 0;
+    // build the arrays for line graph
     for (i=0; i<nums.length; i++) {
-
+      
       // update line graph
       try {
         if (i<lineGraphValues.length) {
@@ -226,24 +321,28 @@ void draw() {
             ;
         }
       }
-      catch (Exception e) {
+        catch (Exception e) {
       }
+      
     }
   }
 
   background(255); 
 
-  // draw the line graph
+  // Draw the line graph
   LineGraph.DrawAxis();
-  for (int i=0;i<lineGraphValues.length; i++) {
+  for (i=0;i<lineGraphValues.length; i++) {
     LineGraph.GraphColor = graphColors[i];
     if (int(getPlotterConfigString("lgVisible"+(i+1))) == 1)
       LineGraph.LineGraph(lineGraphSampleNumbers, lineGraphValues[i]);
   }
+  
 }
 
-// called each time the chart settings are changed by the user 
-void setChartSettings() {
+
+//***********************************************************************************
+void setChartSettings() { // Called each time the chart settings are changed  
+//***********************************************************************************
   LineGraph.xLabel=" Samples ";
   LineGraph.yLabel="Value";
   LineGraph.Title="Serial Plotter v. 1.0";  
@@ -254,10 +353,14 @@ void setChartSettings() {
   LineGraph.yMin=int(getPlotterConfigString("lgMinY"));
 }
 
-// handle gui actions
-void controlEvent(ControlEvent theEvent) {
-  
-  if (theEvent.isAssignableFrom(Textfield.class) || theEvent.isAssignableFrom(Toggle.class) || theEvent.isAssignableFrom(Button.class)) {
+
+//***********************************************************************************
+void controlEvent(ControlEvent theEvent) {  // Handle gui actions
+//***********************************************************************************  
+  if (theEvent.isAssignableFrom(Textfield.class) || 
+      theEvent.isAssignableFrom(Toggle.class) ||  
+      theEvent.isAssignableFrom(Button.class)) 
+  {
     String parameter = theEvent.getName();
     String value = "";
     
@@ -272,8 +375,11 @@ void controlEvent(ControlEvent theEvent) {
   setChartSettings();
 }
 
-// get gui settings from settings file
+
+//***********************************************************************************
+// Get GUI settings from plotter configuration JSON object
 String getPlotterConfigString(String id) {
+//***********************************************************************************
   String r = "";
   try {
     r = plotterConfigJSON.getString(id);
