@@ -38,6 +38,8 @@ I based this app on his BasicRealTimePlotter example. Like his code, this code r
 
 ## Next Steps? 
   * Easier configuration of serial port. (Currently a command line argument)
+  * Auto Y scaling?
+  * Resizable Window
   * Suggestions, forks/pull requests welcome!
 
 ## Code available on: 
