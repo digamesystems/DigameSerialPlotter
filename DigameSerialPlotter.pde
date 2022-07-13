@@ -35,7 +35,7 @@ import processing.serial.*;
 /* GLOBALS */
 
 // Serial port to connect to
-String  serialPortName="COM24";  // For Linux / Pi something like: "/dev/tty.usbmodem1411";
+String  serialPortName = "COM7";  // For Linux / Pi something like: "/dev/tty.usbmodem1411";
 byte    terminator     = '\n';   // The last character in a data frame -- usually <cr> or <lf> 
 boolean mockupSerial   = false;  // If you want to debug the plotter without using 
                                  //   a real serial port set this to true
@@ -48,9 +48,9 @@ JSONObject plotterConfigJSON;    // Settings for the plotter are saved in this o
 
 // Plot
 Graph LineGraph = new Graph(450, 70, 900, 600, color (20, 20, 200));
-float[][] lineGraphValues      = new float[6][200];
+float[][] lineGraphValues      = new float[9][200];
 float[] lineGraphSampleNumbers = new float[200];
-color[] graphColors            = new color[6];
+color[] graphColors            = new color[9];
 
 String topSketchPath = "";  // Path to config file
 
@@ -60,6 +60,7 @@ long numPointsLogged = 0;
 Textlabel lblPointsLogged;
 Toggle    tglLogData;
 Textfield txtLogFileName;
+
 
 
 
@@ -128,9 +129,8 @@ void initSerial() {
     delay(1000);
     serialPortName = args[0];
   } else {
-    println("No com port specified. Using default value. (COM24)");
+    println("No com port specified. Using default value. (" + serialPortName + ")");
     delay(1000);
-    serialPortName = "COM24";  // Change to match your setup if you don't run from the command line. 
   }
   
   //  serial communication
@@ -159,7 +159,11 @@ void setup() {
   graphColors[3] = color(62, 12, 232);
   graphColors[4] = color(13, 255, 243);
   graphColors[5] = color(200, 46, 232);
-
+  graphColors[6] = color(128, 128, 0);
+  graphColors[7] = color(0, 128, 128);
+  graphColors[8] = color(128, 0, 128);
+  
+  
   // Load the previous graph settings
   topSketchPath     = sketchPath();
   plotterConfigJSON = loadJSONObject(topSketchPath+"/plotter_config.json");
@@ -202,6 +206,9 @@ void setup() {
   addTextField("lgMultiplier4", x,     y=y+ySpacing, font);
   addTextField("lgMultiplier5", x,     y=y+ySpacing, font);
   addTextField("lgMultiplier6", x,     y=y+ySpacing, font);
+  addTextField("lgMultiplier7", x,     y=y+ySpacing, font);
+  addTextField("lgMultiplier8", x,     y=y+ySpacing, font);
+  addTextField("lgMultiplier9", x,     y=y+ySpacing, font);
   
   y = initY + ySpacing;
   addTextField("lgOffset1", x=230, y, font);
@@ -210,6 +217,9 @@ void setup() {
   addTextField("lgOffset4", x, y=y+ySpacing, font);
   addTextField("lgOffset5", x, y=y+ySpacing, font);
   addTextField("lgOffset6", x, y=y+ySpacing, font);
+  addTextField("lgOffset7", x, y=y+ySpacing, font);
+  addTextField("lgOffset8", x, y=y+ySpacing, font);
+  addTextField("lgOffset9", x, y=y+ySpacing, font);
   
   y = initY + ySpacing;
   addToggle("lgVisible1", x=45, y,            graphColors[0]);
@@ -218,6 +228,9 @@ void setup() {
   addToggle("lgVisible4", x,    y=y+ySpacing, graphColors[3]);
   addToggle("lgVisible5", x,    y=y+ySpacing, graphColors[4]);
   addToggle("lgVisible6", x,    y=y+ySpacing, graphColors[5]);
+  addToggle("lgVisible7", x,    y=y+ySpacing, graphColors[6]);
+  addToggle("lgVisible8", x,    y=y+ySpacing, graphColors[7]);
+  addToggle("lgVisible9", x,    y=y+ySpacing, graphColors[8]);
   
   
   cp5.addTextlabel("lblLogFile").setFont(font).setText("Log File: ").setPosition(x=33, y=y+ySpacing*2).setColor(0);
@@ -345,7 +358,7 @@ void setChartSettings() { // Called each time the chart settings are changed
 //***********************************************************************************
   LineGraph.xLabel=" Samples ";
   LineGraph.yLabel="Value";
-  LineGraph.Title="Serial Plotter v. 1.0";  
+  LineGraph.Title="Serial Plotter v. 1.0.1";  
   LineGraph.xDiv=10;  
   LineGraph.xMax=0; 
   LineGraph.xMin=-200;  
@@ -377,7 +390,7 @@ void controlEvent(ControlEvent theEvent) {  // Handle gui actions
 
 
 //***********************************************************************************
-// Get GUI settings from plotter configuration JSON object
+// Get GUI settings from the plotter configuration JSON object
 String getPlotterConfigString(String id) {
 //***********************************************************************************
   String r = "";
